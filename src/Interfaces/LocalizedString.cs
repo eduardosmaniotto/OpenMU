@@ -155,11 +155,11 @@ public readonly struct LocalizedString : IEquatable<LocalizedString>
     /// <paramref name="fallbackToNeutral"/> is <see langword="true"/> and no specific translation exists,
     /// or an empty string if neither is available.
     /// </returns>
-    public string GetTranslation(CultureInfo cultureInfo, bool fallbackToNeutral = true)
+    public string? GetTranslation(CultureInfo cultureInfo, bool fallbackToNeutral = true)
     {
         var span = this.GetTranslationAsSpan(cultureInfo, fallbackToNeutral);
         return span.IsEmpty
-            ? string.Empty
+            ? null
             : new(span);
     }
 
