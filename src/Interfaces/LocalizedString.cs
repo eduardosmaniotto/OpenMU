@@ -139,7 +139,7 @@ public readonly struct LocalizedString : IEquatable<LocalizedString>
     /// </returns>
     public override string? ToString()
     {
-        return this.GetTranslation(CultureInfo.CurrentCulture);
+        return this.Value is null ? null : this.GetTranslation(CultureInfo.CurrentCulture);
     }
 
     /// <summary>
@@ -158,7 +158,9 @@ public readonly struct LocalizedString : IEquatable<LocalizedString>
     public string GetTranslation(CultureInfo cultureInfo, bool fallbackToNeutral = true)
     {
         var span = this.GetTranslationAsSpan(cultureInfo, fallbackToNeutral);
-        return new(span);
+        return span.IsEmpty
+            ? string.Empty
+            : new(span);
     }
 
     /// <summary>
