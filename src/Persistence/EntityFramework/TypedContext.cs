@@ -82,20 +82,11 @@ internal class TypedContext : EntityDataContext, ITypedContext
         var gameConfigType = modelTypes.FirstOrDefault(mt => mt.ClrType == typeof(EntityFramework.Model.GameConfiguration));
         var gameConfigNav = gameConfigType?.GetNavigations().FirstOrDefault(nav => nav.IsCollection && nav.TargetEntityType.ClrType == mainType);
 
-        var additionalTypes = editTypes
-            .SelectMany(et =>
-            {
-                var entityType = modelTypes.FirstOrDefault(mt => mt.ClrType == et.EntityType);
-                if (entityType is null)
-                {
-                    return Enumerable.Empty<(Type, bool, bool)>();
-                }
-
-                return DetermineAdditionalTypes(
-                    modelTypes.Select(t => t.ClrType),
-                    entityType);
-            })
-            .ToList();
+        var additionalTypes = (from et in editTypes
+                               let entityType = modelTypes.FirstOrDefault(mt => mt.ClrType == et.EntityType)
+                               where entityType is not null
+                               from additional in DetermineAdditionalTypes(modelTypes.Select(t => t.ClrType), entityType!)
+                               select additional).ToList();
         editTypes.AddRange(additionalTypes);
         var finalEditTypes = new HashSet<Type>();
         foreach (var type in editTypes)
