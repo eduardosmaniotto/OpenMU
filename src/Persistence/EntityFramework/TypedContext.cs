@@ -83,21 +83,32 @@ internal class TypedContext : EntityDataContext, ITypedContext
         var gameConfigNav = gameConfigType?.GetNavigations().FirstOrDefault(nav => nav.IsCollection && nav.TargetEntityType.ClrType == mainType);
 
         var additionalTypes = editTypes
-            .SelectMany(et => DetermineAdditionalTypes(
-                modelTypes.Select(t => t.ClrType),
-                modelTypes.First(mt => mt.ClrType == et.EntityType)))
+            .SelectMany(et =>
+            {
+                var entityType = modelTypes.FirstOrDefault(mt => mt.ClrType == et.EntityType);
+                if (entityType is null)
+                {
+                    return Enumerable.Empty<(Type, bool, bool)>();
+                }
+
+                return DetermineAdditionalTypes(
+                    modelTypes.Select(t => t.ClrType),
+                    entityType);
+            })
             .ToList();
         editTypes.AddRange(additionalTypes);
         var finalEditTypes = new HashSet<Type>();
         foreach (var type in editTypes)
         {
-            finalEditTypes.Add(type.EntityType);
-            if (type.EntityType.BaseType is { } baseType && baseType != typeof(object))
+            var existingType = modelBuilder.Model.FindEntityType(type.EntityType);
+            if (existingType is not null)
             {
-                finalEditTypes.Add(baseType);
+                finalEditTypes.Add(existingType.ClrType);
+                if (existingType.ClrType.BaseType is { } baseType && baseType != typeof(object))
+                {
+                    finalEditTypes.Add(baseType);
+                }
             }
-
-            modelBuilder.Entity(type.EntityType);
         }
 
         if (gameConfigNav is not null)
