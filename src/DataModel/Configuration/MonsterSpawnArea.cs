@@ -5,6 +5,7 @@
 namespace MUnique.OpenMU.DataModel.Configuration;
 
 using MUnique.OpenMU.Annotations;
+using System.ComponentModel.DataAnnotations;
 
 /// <summary>
 /// Defines the trigger when a monster spawns.
@@ -67,6 +68,7 @@ public enum SpawnTrigger
 /// Defines an monster spawn area.
 /// </summary>
 [Cloneable]
+[CustomValidation(typeof(MonsterSpawnArea), nameof(MonsterSpawnArea.ValidateCoordinates))]
 public partial class MonsterSpawnArea
 {
     /// <summary>
@@ -148,4 +150,25 @@ public partial class MonsterSpawnArea
     ///   <c>true</c> if this instance is point; otherwise, <c>false</c>.
     /// </returns>
     public bool IsPoint() => this.X1 == this.X2 && this.Y1 == this.Y2;
+
+    /// <summary>
+    /// Validates that the spawn area coordinates are in the correct order (X1 ≤ X2 and Y1 ≤ Y2).
+    /// </summary>
+    /// <param name="spawnArea">The spawn area to validate.</param>
+    /// <param name="validationContext">The validation context.</param>
+    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
+    public static ValidationResult? ValidateCoordinates(MonsterSpawnArea spawnArea, ValidationContext validationContext)
+    {
+        if (spawnArea.X1 > spawnArea.X2)
+        {
+            return new ValidationResult($"X1 ({spawnArea.X1}) must be less than or equal to X2 ({spawnArea.X2}).", [nameof(X1), nameof(X2)]);
+        }
+
+        if (spawnArea.Y1 > spawnArea.Y2)
+        {
+            return new ValidationResult($"Y1 ({spawnArea.Y1}) must be less than or equal to Y2 ({spawnArea.Y2}).", [nameof(Y1), nameof(Y2)]);
+        }
+
+        return ValidationResult.Success;
+    }
 }
