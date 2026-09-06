@@ -18,12 +18,6 @@ using MUnique.OpenMU.GameLogic.PlayerActions.ItemConsumeActions;
 /// </summary>
 internal static class BotSkillHandler
 {
-    /// <summary>The item group of skill orbs.</summary>
-    private const byte OrbGroup = 12;
-
-    /// <summary>The item group of skill scrolls and parchments.</summary>
-    private const byte ScrollGroup = 15;
-
     private static readonly ItemConsumeAction ConsumeAction = new();
 
     /// <summary>
@@ -44,7 +38,7 @@ internal static class BotSkillHandler
             return false;
         }
 
-        if (definition.Group != OrbGroup && definition.Group != ScrollGroup)
+        if (definition.Group != BotProgression.SkillOrbItemGroup && definition.Group != BotProgression.SkillScrollItemGroup)
         {
             return false;
         }

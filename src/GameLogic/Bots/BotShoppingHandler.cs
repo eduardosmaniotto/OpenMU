@@ -238,7 +238,15 @@ internal static class BotShoppingHandler
             }
 
             // Whatever the bot would wear stays: selling a piece it picked up as an upgrade one tick
-            // before it puts it on is pure loss.
+            // before it puts it on is pure loss. The same holds for a looted orb or scroll waiting for
+            // the next learn pass (see BotSkillHandler) - it is not an upgrade, so without this guard it
+            // would fall straight through into the junk below. Keeping it out of the junk list also
+            // protects it from being destroyed as unsellable under slot pressure.
+            if (BotSkillHandler.WantsSkillItem(player, item))
+            {
+                continue;
+            }
+
             if (!BotEquipmentHandler.IsUpgradeFor(player, item))
             {
                 junk.Add(item);

@@ -524,10 +524,11 @@ internal sealed class BotGenerator
     /// as the class's own buffs and heals (e.g. elf Heal/Greater Defense/Greater Damage). Only skills the
     /// class is qualified for are ever learned, gated by the skills' real learn requirements from the game
     /// configuration (total energy, leadership, character level, ...) evaluated against the stats the bot
-    /// was just given - exactly the requirements a human player has to meet for the same skill. Orb and
-    /// scroll skills additionally require their granting item to be obtainable (see
-    /// <see cref="BotProgression.IsGrantingItemObtainable"/>), so a bot cannot learn a scroll before the
-    /// monster level where it starts to drop.
+    /// was just given - exactly the requirements a human player has to meet for the same skill. Item-bound
+    /// skills follow the backfill rules (see <see cref="BotProgression.MayBackfillSkill"/>): orb/scroll
+    /// skills only when their granting item is obtainable, so a bot cannot learn a scroll before the
+    /// monster level where it starts to drop - and never when the skill comes from worn equipment or a
+    /// pet, which the server grants temporarily on equip instead.
     /// </summary>
     private void LearnClassSkills(IPlayerContext context, Character character, CharacterClass characterClass, int level)
     {
@@ -544,13 +545,13 @@ internal sealed class BotGenerator
         }
 
         var learnedNumbers = new HashSet<short>(character.LearnedSkills.Select(s => s.Skill!.Number));
-        var itemGrantedSkillNumbers = BotProgression.GetItemGrantedSkillNumbers(this._gameContext.Configuration);
+        var grantingItems = BotProgression.GetGrantingItems(this._gameContext.Configuration);
         foreach (var skill in this._gameContext.Configuration.Skills)
         {
-            if (!BotProgression.IsBotLearnableSkill(skill, itemGrantedSkillNumbers)
+            if (!BotProgression.IsBotLootableSkill(skill)
                 || !skill.QualifiedCharacters.Contains(characterClass)
                 || !BotProgression.MeetsRequirements(skill, GetValue)
-                || !BotProgression.IsGrantingItemObtainable(skill, this._gameContext.Configuration, characterClass, level, GetValue)
+                || !BotProgression.MayBackfillSkill(skill, grantingItems, characterClass, level, GetValue)
                 || !learnedNumbers.Add(skill.Number))
             {
                 continue;
@@ -562,6 +563,4 @@ internal sealed class BotGenerator
             character.LearnedSkills.Add(entry);
         }
     }
-
-
 }

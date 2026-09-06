@@ -16,7 +16,6 @@ using MUnique.OpenMU.GameLogic.Bots;
 [TestFixture]
 public class BotProgressionTests
 {
-    private static readonly IReadOnlySet<short> NoItemGrantedSkills = new HashSet<short>();
     /// <summary>
     /// Tests that the split assigns all points proportionally when nothing is capped.
     /// </summary>
@@ -81,13 +80,10 @@ public class BotProgressionTests
     }
 
     /// <summary>
-    /// Tests that skills only ever obtained by consuming an orb/scroll or equipping a weapon or pet
-    /// carrying the skill are never learned for free: the gate lives on that item, not on the skill, so
-    /// <see cref="MeetsRequirements"/> would find nothing to fail. The set of item-granted skills comes
-    /// from the game configuration (<see cref="BotProgression.GetItemGrantedSkillNumbers"/>), which
-    /// covers orbs, scrolls, weapons and pets alike.
+    /// Tests that orb/scroll skills carrying no requirements of their own are never backfilled at
+    /// generation: the gate lives on the orb or scroll alone, so the loot path teaches them instead.
     /// </summary>
-    /// <param name="skillNumber">The number of an item-granted skill.</param>
+    /// <param name="skillNumber">The number of an orb-gated skill.</param>
     [TestCase((short)41, "Twisting Slash")]
     [TestCase((short)51, "Ice Arrow")]
     [TestCase((short)55, "Fire Slash")]
@@ -97,8 +93,9 @@ public class BotProgressionTests
     [TestCase((short)260, "Killing Blow")]
     [TestCase((short)261, "Beast Uppercut")]
     [TestCase((short)270, "Phoenix Shot")]
-    public void IsBotLearnableSkill_ItemGrantedSkillWithoutOwnRequirements_ReturnsFalse(short skillNumber, string name)
+    public void MayBackfillSkill_ConsumableGrantWithoutSkillRequirements_ReturnsFalse(short skillNumber, string name)
     {
+        var characterClass = new CharacterClass();
         var skill = new Skill
         {
             Number = skillNumber,
@@ -107,8 +104,17 @@ public class BotProgressionTests
             AttackDamage = 0,
             NumberOfHitsPerAttack = 4,
         };
+        var orb = new TestItemDefinition
+        {
+            Group = 12,
+            Number = 1,
+            DropLevel = 1,
+            Skill = skill,
+        };
+        orb.QualifiedCharacters.Add(characterClass);
+        var grants = new Dictionary<short, List<ItemDefinition>> { [skillNumber] = new List<ItemDefinition> { orb } };
 
-        Assert.That(BotProgression.IsBotLearnableSkill(skill, new HashSet<short> { skillNumber }), Is.False);
+        Assert.That(BotProgression.MayBackfillSkill(skill, grants, characterClass, 1, _ => 0f), Is.False);
     }
 
     /// <summary>
@@ -117,7 +123,7 @@ public class BotProgressionTests
     /// missing item would otherwise give it away for free.
     /// </summary>
     [Test]
-    public void IsBotLearnableSkill_ExplicitlyExcludedWithoutGrantingItem_ReturnsFalse()
+    public void IsBotLootableSkill_ExplicitlyExcludedWithoutGrantingItem_ReturnsFalse()
     {
         var skill = new Skill
         {
@@ -128,17 +134,19 @@ public class BotProgressionTests
             NumberOfHitsPerAttack = 4,
         };
 
-        Assert.That(BotProgression.IsBotLearnableSkill(skill, NoItemGrantedSkills), Is.False);
+        Assert.That(BotProgression.IsBotLootableSkill(skill), Is.False);
     }
 
     /// <summary>
-    /// Tests that an item-granted skill which also carries requirements of its own stays learnable: the
-    /// item is not the gate, the requirements are. Rageful Blow is granted by an orb yet demands level
-    /// 170 (see the initialization), and a bot meeting that requirement may use it like any player.
+    /// Tests that an orb/scroll skill which also carries requirements of its own is backfilled once its
+    /// granting orb is obtainable: the item is not the only gate, the requirements are. Rageful Blow is
+    /// granted by an orb yet demands level 170 (see the initialization), and a bot meeting that
+    /// requirement may use it like any player.
     /// </summary>
     [Test]
-    public void IsBotLearnableSkill_ItemGrantedSkillWithOwnRequirements_ReturnsTrue()
+    public void MayBackfillSkill_ObtainableOrbWithSkillRequirements_ReturnsTrue()
     {
+        var characterClass = new CharacterClass();
         var skill = new SkillWithRequirements(new AttributeRequirement { Attribute = Stats.Level, MinimumValue = 170 })
         {
             Number = 42,
@@ -147,8 +155,18 @@ public class BotProgressionTests
             AttackDamage = 60,
             NumberOfHitsPerAttack = 1,
         };
+        var orb = new TestItemDefinition
+        {
+            Group = 12,
+            Number = 12,
+            DropLevel = 78,
+            Skill = skill,
+        };
+        orb.QualifiedCharacters.Add(characterClass);
+        orb.Requirements.Add(new AttributeRequirement { Attribute = Stats.Level, MinimumValue = 170 });
+        var grants = new Dictionary<short, List<ItemDefinition>> { [42] = new List<ItemDefinition> { orb } };
 
-        Assert.That(BotProgression.IsBotLearnableSkill(skill, new HashSet<short> { 42 }), Is.True);
+        Assert.That(BotProgression.MayBackfillSkill(skill, grants, characterClass, 170, _ => 0f), Is.True);
     }
 
     /// <summary>
@@ -164,7 +182,7 @@ public class BotProgressionTests
     [TestCase((short)73, "Mana Rays")]
     [TestCase((short)74, "Fire Blast")]
     [TestCase((short)269, "Charge")]
-    public void IsBotLearnableSkill_SiegeMarkedSkill_ReturnsFalse(short skillNumber, string name)
+    public void IsBotLootableSkill_SiegeMarkedSkill_ReturnsFalse(short skillNumber, string name)
     {
         var skill = new Skill
         {
@@ -175,7 +193,7 @@ public class BotProgressionTests
             NumberOfHitsPerAttack = 4,
         };
 
-        Assert.That(BotProgression.IsBotLearnableSkill(skill, NoItemGrantedSkills), Is.False);
+        Assert.That(BotProgression.IsBotLootableSkill(skill), Is.False);
     }
 
     /// <summary>
@@ -189,7 +207,7 @@ public class BotProgressionTests
     [TestCase((short)70, "Invisibility")]
     [TestCase((short)71, "Cancel Invisibility")]
     [TestCase((short)72, "Abolish Magic")]
-    public void IsBotLearnableSkill_CastleSiegeRoleSkill_ReturnsFalse(short skillNumber, string name)
+    public void IsBotLootableSkill_CastleSiegeRoleSkill_ReturnsFalse(short skillNumber, string name)
     {
         var skill = new Skill
         {
@@ -200,29 +218,7 @@ public class BotProgressionTests
             NumberOfHitsPerAttack = 1,
         };
 
-        Assert.That(BotProgression.IsBotLearnableSkill(skill, NoItemGrantedSkills), Is.False);
-    }
-
-    /// <summary>
-    /// Tests that mount-bound skills are never learned by a bot - a bot fighting with one on foot
-    /// does something no player can do.
-    /// </summary>
-    [TestCase((short)47, "Impale", 28)]
-    [TestCase((short)49, "Fire Breath", 110)]
-    [TestCase((short)76, "Plasma Storm", 110)]
-    public void IsBotLearnableSkill_MountRequiredSkill_ReturnsFalse(short skillNumber, string name, int levelRequirement)
-    {
-        var skill = new SkillWithRequirements(new AttributeRequirement { Attribute = Stats.Level, MinimumValue = levelRequirement })
-        {
-            Number = skillNumber,
-            Name = name,
-            SkillType = SkillType.DirectHit,
-            AttackDamage = 15,
-            NumberOfHitsPerAttack = 1,
-        };
-
-        Assert.That(BotProgression.IsBotLearnableSkill(skill, NoItemGrantedSkills), Is.False);
-        Assert.That(BotProgression.RequiresMount(skill), Is.True);
+        Assert.That(BotProgression.IsBotLootableSkill(skill), Is.False);
     }
 
     /// <summary>
@@ -244,67 +240,138 @@ public class BotProgressionTests
     }
 
     /// <summary>
-    /// Tests that a skill with no granting item is not item-gated.
+    /// Tests that a skill with no granting item at all is backfilled freely.
     /// </summary>
     [Test]
-    public void IsGrantingItemObtainable_NoGrantingItem_ReturnsTrue()
+    public void MayBackfillSkill_NoGrantingItem_ReturnsTrue()
     {
-        var config = new GameConfiguration();
-        var characterClass = new CharacterClass();
+        var grants = new Dictionary<short, List<ItemDefinition>>();
         var skill = new Skill { Number = 9, Name = "Evil Spirit" };
 
-        Assert.That(BotProgression.IsGrantingItemObtainable(skill, config, characterClass, 1, _ => 0f), Is.True);
+        Assert.That(BotProgression.MayBackfillSkill(skill, grants, new CharacterClass(), 1, _ => 0f), Is.True);
     }
 
     /// <summary>
-    /// Tests that a bot below the granting item's drop level cannot have the skill yet: with the item
-    /// dropping from level 50 on, a low-level bot with enough energy still must wait.
+    /// Tests that a bot below the granting orb/scroll's drop level is not backfilled: with the item
+    /// dropping from level 50 on, a low-level bot with enough energy still must wait for the loot path.
     /// </summary>
     [Test]
-    public void IsGrantingItemObtainable_BelowDropLevel_ReturnsFalse()
+    public void MayBackfillSkill_BelowDropLevel_ReturnsFalse()
     {
-        var (config, characterClass, skill) = CreateEvilSpiritSetup(dropLevel: 50);
+        var (grants, characterClass, skill) = CreateScrollGrant(dropLevel: 50);
         float? GetValue(AttributeDefinition attribute) => attribute == Stats.TotalEnergy ? 300f : null;
 
-        Assert.That(BotProgression.IsGrantingItemObtainable(skill, config, characterClass, 30, GetValue), Is.False);
+        Assert.That(BotProgression.MayBackfillSkill(skill, grants, characterClass, 30, GetValue), Is.False);
     }
 
     /// <summary>
-    /// Tests that the same bot may learn the skill once it reaches the drop level with the required energy.
+    /// Tests that the same bot is backfilled once it reaches the drop level with the required energy.
     /// </summary>
     [Test]
-    public void IsGrantingItemObtainable_AtDropLevelWithRequirements_ReturnsTrue()
+    public void MayBackfillSkill_AtDropLevelWithRequirements_ReturnsTrue()
     {
-        var (config, characterClass, skill) = CreateEvilSpiritSetup(dropLevel: 50);
+        var (grants, characterClass, skill) = CreateScrollGrant(dropLevel: 50);
         float? GetValue(AttributeDefinition attribute) => attribute == Stats.TotalEnergy ? 300f : null;
 
-        Assert.That(BotProgression.IsGrantingItemObtainable(skill, config, characterClass, 50, GetValue), Is.True);
+        Assert.That(BotProgression.MayBackfillSkill(skill, grants, characterClass, 50, GetValue), Is.True);
     }
 
     /// <summary>
-    /// Tests that the granting item must accept the bot's class.
+    /// Tests that the granting orb/scroll must accept the bot's class.
     /// </summary>
     [Test]
-    public void IsGrantingItemObtainable_WrongClass_ReturnsFalse()
+    public void MayBackfillSkill_WrongClass_ReturnsFalse()
     {
-        var (config, _, skill) = CreateEvilSpiritSetup(dropLevel: 50);
+        var (grants, _, skill) = CreateScrollGrant(dropLevel: 50);
         var otherClass = new CharacterClass { Number = 4 };
         float? GetValue(AttributeDefinition attribute) => attribute == Stats.TotalEnergy ? 300f : null;
 
-        Assert.That(BotProgression.IsGrantingItemObtainable(skill, config, otherClass, 50, GetValue), Is.False);
+        Assert.That(BotProgression.MayBackfillSkill(skill, grants, otherClass, 50, GetValue), Is.False);
     }
 
     /// <summary>
-    /// Tests that the item's own requirements gate the skill: without the required energy the scroll
-    /// could not have been consumed, even at the drop level.
+    /// Tests that the orb/scroll's own requirements gate the backfill: without the required energy the
+    /// scroll could not have been consumed, even at the drop level.
     /// </summary>
     [Test]
-    public void IsGrantingItemObtainable_RequirementsNotMet_ReturnsFalse()
+    public void MayBackfillSkill_RequirementsNotMet_ReturnsFalse()
     {
-        var (config, characterClass, skill) = CreateEvilSpiritSetup(dropLevel: 50);
+        var (grants, characterClass, skill) = CreateScrollGrant(dropLevel: 50);
         float? GetValue(AttributeDefinition attribute) => attribute == Stats.TotalEnergy ? 100f : null;
 
-        Assert.That(BotProgression.IsGrantingItemObtainable(skill, config, characterClass, 50, GetValue), Is.False);
+        Assert.That(BotProgression.MayBackfillSkill(skill, grants, characterClass, 50, GetValue), Is.False);
+    }
+
+    /// <summary>
+    /// Tests that a skill granted only by worn equipment or a pet is never backfilled, even with stat
+    /// requirements of its own: those are learned temporarily by equipping the item, so writing them
+    /// into the learned skills would make them permanent.
+    /// </summary>
+    [Test]
+    public void MayBackfillSkill_EquipmentGrantedOnly_ReturnsFalse()
+    {
+        var characterClass = new CharacterClass { Number = 4 };
+        var skill = new SkillWithRequirements(new AttributeRequirement { Attribute = Stats.Level, MinimumValue = 110 })
+        {
+            Number = 49,
+            Name = "Fire Breath",
+            SkillType = SkillType.DirectHit,
+            AttackDamage = 30,
+            NumberOfHitsPerAttack = 1,
+        };
+        var pet = new TestItemDefinition
+        {
+            Group = 13,
+            Number = 3,
+            Name = "Horn of Dinorant",
+            DropLevel = 110,
+            Skill = skill,
+        };
+        pet.QualifiedCharacters.Add(characterClass);
+        var grants = new Dictionary<short, List<ItemDefinition>> { [skill.Number] = new List<ItemDefinition> { pet } };
+
+        Assert.That(BotProgression.MayBackfillSkill(skill, grants, characterClass, 110, _ => 0f), Is.False);
+    }
+
+    /// <summary>
+    /// Tests that a worn-equipment grant does not block the backfill when an obtainable orb exists
+    /// alongside it: the permanent skill comes from the consumable, the equipment grant is temporary.
+    /// </summary>
+    [Test]
+    public void MayBackfillSkill_MixedGrantsWithObtainableOrb_ReturnsTrue()
+    {
+        var characterClass = new CharacterClass { Number = 4 };
+        var skill = new SkillWithRequirements(new AttributeRequirement { Attribute = Stats.Level, MinimumValue = 170 })
+        {
+            Number = 42,
+            Name = "Rageful Blow",
+            SkillType = SkillType.AreaSkillAutomaticHits,
+            AttackDamage = 60,
+            NumberOfHitsPerAttack = 1,
+        };
+        var weapon = new TestItemDefinition
+        {
+            Group = 0,
+            Number = 1,
+            Name = "Blade of Rageful Blow",
+            DropLevel = 78,
+            Skill = skill,
+        };
+        weapon.QualifiedCharacters.Add(characterClass);
+        var orb = new TestItemDefinition
+        {
+            Group = 12,
+            Number = 12,
+            Name = "Orb of Rageful Blow",
+            DropLevel = 78,
+            Skill = skill,
+        };
+        orb.QualifiedCharacters.Add(characterClass);
+        orb.Requirements.Add(new AttributeRequirement { Attribute = Stats.Level, MinimumValue = 170 });
+        var grants = new Dictionary<short, List<ItemDefinition>> { [skill.Number] = new List<ItemDefinition> { weapon, orb } };
+        float? GetValue(AttributeDefinition attribute) => attribute == Stats.Level ? 170f : null;
+
+        Assert.That(BotProgression.MayBackfillSkill(skill, grants, characterClass, 170, GetValue), Is.True);
     }
 
     /// <summary>
@@ -319,43 +386,6 @@ public class BotProgressionTests
         Assert.That(BotProgression.TotalToBaseStat(Stats.TotalAgilityRequirementValue), Is.EqualTo(Stats.BaseAgility));
         Assert.That(BotProgression.TotalToBaseStat(Stats.TotalVitalityRequirementValue), Is.EqualTo(Stats.BaseVitality));
         Assert.That(BotProgression.TotalToBaseStat(Stats.TotalLeadershipRequirementValue), Is.EqualTo(Stats.BaseLeadership));
-    }
-
-    private static (GameConfiguration Config, CharacterClass CharacterClass, Skill Skill) CreateEvilSpiritSetup(byte dropLevel)
-    {
-        var config = new TestGameConfiguration();
-        var characterClass = new CharacterClass { Number = 0 };
-        var skill = new Skill { Number = 9, Name = "Evil Spirit" };
-        var scroll = new TestItemDefinition
-        {
-            Group = 15,
-            Number = 8,
-            Name = "Scroll of Evil Spirit",
-            DropLevel = dropLevel,
-            Skill = skill,
-        };
-        scroll.QualifiedCharacters.Add(characterClass);
-        scroll.Requirements.Add(new AttributeRequirement { Attribute = Stats.TotalEnergyRequirementValue, MinimumValue = 220 });
-        config.Items.Add(scroll);
-        return (config, characterClass, skill);
-    }
-
-    private sealed class TestGameConfiguration : GameConfiguration
-    {
-        public TestGameConfiguration()
-        {
-            this.Items = new List<ItemDefinition>();
-        }
-    }
-
-    private sealed class TestItemDefinition : ItemDefinition
-    {
-        public TestItemDefinition()
-        {
-            this.Requirements = new List<AttributeRequirement>();
-            this.QualifiedCharacters = new List<CharacterClass>();
-            this.BasePowerUpAttributes = new List<ItemBasePowerUpDefinition>();
-        }
     }
 
     /// <summary>
@@ -412,6 +442,37 @@ public class BotProgressionTests
         var greaterDefense = new Skill { Number = 27, Name = "Greater Defense", SkillType = SkillType.Buff, AttackDamage = 0, MagicEffectDef = new MagicEffectDefinition() };
 
         Assert.That(BotProgression.IsBotLootableSkill(greaterDefense), Is.True);
+    }
+
+    private static (Dictionary<short, List<ItemDefinition>> Grants, CharacterClass CharacterClass, Skill Skill) CreateScrollGrant(byte dropLevel)
+    {
+        var characterClass = new CharacterClass { Number = 0 };
+        var skill = new SkillWithRequirements(new AttributeRequirement { Attribute = Stats.TotalEnergy, MinimumValue = 220 })
+        {
+            Number = 9,
+            Name = "Evil Spirit",
+        };
+        var scroll = new TestItemDefinition
+        {
+            Group = 15,
+            Number = 8,
+            Name = "Scroll of Evil Spirit",
+            DropLevel = dropLevel,
+            Skill = skill,
+        };
+        scroll.QualifiedCharacters.Add(characterClass);
+        scroll.Requirements.Add(new AttributeRequirement { Attribute = Stats.TotalEnergyRequirementValue, MinimumValue = 220 });
+        var grants = new Dictionary<short, List<ItemDefinition>> { [skill.Number] = new List<ItemDefinition> { scroll } };
+        return (grants, characterClass, skill);
+    }
+
+    private sealed class TestItemDefinition : ItemDefinition
+    {
+        public TestItemDefinition()
+        {
+            this.Requirements = new List<AttributeRequirement>();
+            this.QualifiedCharacters = new List<CharacterClass>();
+        }
     }
 
     private sealed class SkillWithRequirements : Skill
