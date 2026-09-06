@@ -166,7 +166,7 @@ public class BotSkillProgressionPlugIn : ICharacterLevelUpPlugIn
         foreach (var skill in player.GameContext.Configuration.Skills)
         {
             if (itemGrantedSkillNumbers.Contains(skill.Number)
-                || !BotProgression.IsBotLootableSkill(skill)
+                || !BotProgression.MayBotOwnSkill(skill)
                 || !skill.QualifiedCharacters.Contains(characterClass)
                 || skillList.ContainsSkill((ushort)skill.Number)
                 || !BotProgression.MeetsRequirements(skill, GetValue))

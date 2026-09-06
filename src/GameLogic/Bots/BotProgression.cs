@@ -351,7 +351,7 @@ internal static class BotProgression
     /// debuffs and utility skills are left out.
     /// </summary>
     /// <param name="skill">The skill to check.</param>
-    public static bool IsBotLootableSkill(Skill skill)
+    public static bool MayBotOwnSkill(Skill skill)
     {
         if (skill.MasterDefinition is not null
             || CastleSiegeOnlySkillNumbers.Contains(skill.Number)

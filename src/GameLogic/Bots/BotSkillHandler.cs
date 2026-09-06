@@ -50,7 +50,7 @@ internal static class BotSkillHandler
 
         if (!skill.QualifiedCharacters.Contains(characterClass)
             || !definition.QualifiedCharacters.Contains(characterClass)
-            || !BotProgression.IsBotLootableSkill(skill))
+            || !BotProgression.MayBotOwnSkill(skill))
         {
             return false;
         }

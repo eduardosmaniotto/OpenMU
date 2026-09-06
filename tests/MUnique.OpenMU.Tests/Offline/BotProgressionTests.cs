@@ -123,7 +123,7 @@ public class BotProgressionTests
     /// missing item would otherwise give it away for free.
     /// </summary>
     [Test]
-    public void IsBotLootableSkill_ExplicitlyExcludedWithoutGrantingItem_ReturnsFalse()
+    public void MayBotOwnSkill_ExplicitlyExcludedWithoutGrantingItem_ReturnsFalse()
     {
         var skill = new Skill
         {
@@ -134,7 +134,7 @@ public class BotProgressionTests
             NumberOfHitsPerAttack = 4,
         };
 
-        Assert.That(BotProgression.IsBotLootableSkill(skill), Is.False);
+        Assert.That(BotProgression.MayBotOwnSkill(skill), Is.False);
     }
 
     /// <summary>
@@ -182,7 +182,7 @@ public class BotProgressionTests
     [TestCase((short)73, "Mana Rays")]
     [TestCase((short)74, "Fire Blast")]
     [TestCase((short)269, "Charge")]
-    public void IsBotLootableSkill_SiegeMarkedSkill_ReturnsFalse(short skillNumber, string name)
+    public void MayBotOwnSkill_SiegeMarkedSkill_ReturnsFalse(short skillNumber, string name)
     {
         var skill = new Skill
         {
@@ -193,7 +193,7 @@ public class BotProgressionTests
             NumberOfHitsPerAttack = 4,
         };
 
-        Assert.That(BotProgression.IsBotLootableSkill(skill), Is.False);
+        Assert.That(BotProgression.MayBotOwnSkill(skill), Is.False);
     }
 
     /// <summary>
@@ -207,7 +207,7 @@ public class BotProgressionTests
     [TestCase((short)70, "Invisibility")]
     [TestCase((short)71, "Cancel Invisibility")]
     [TestCase((short)72, "Abolish Magic")]
-    public void IsBotLootableSkill_CastleSiegeRoleSkill_ReturnsFalse(short skillNumber, string name)
+    public void MayBotOwnSkill_CastleSiegeRoleSkill_ReturnsFalse(short skillNumber, string name)
     {
         var skill = new Skill
         {
@@ -218,7 +218,7 @@ public class BotProgressionTests
             NumberOfHitsPerAttack = 1,
         };
 
-        Assert.That(BotProgression.IsBotLootableSkill(skill), Is.False);
+        Assert.That(BotProgression.MayBotOwnSkill(skill), Is.False);
     }
 
     /// <summary>
@@ -313,17 +313,17 @@ public class BotProgressionTests
         var characterClass = new CharacterClass { Number = 4 };
         var skill = new SkillWithRequirements(new AttributeRequirement { Attribute = Stats.Level, MinimumValue = 110 })
         {
-            Number = 49,
-            Name = "Fire Breath",
-            SkillType = SkillType.DirectHit,
-            AttackDamage = 30,
+            Number = 62,
+            Name = "Earthshake",
+            SkillType = SkillType.AreaSkillAutomaticHits,
+            AttackDamage = 150,
             NumberOfHitsPerAttack = 1,
         };
         var pet = new TestItemDefinition
         {
             Group = 13,
-            Number = 3,
-            Name = "Horn of Dinorant",
+            Number = 4,
+            Name = "Dark Horse",
             DropLevel = 110,
             Skill = skill,
         };
@@ -395,11 +395,11 @@ public class BotProgressionTests
     [TestCase((short)47, "Impale")]
     [TestCase((short)49, "Fire Breath")]
     [TestCase((short)76, "Plasma Storm")]
-    public void IsBotLootableSkill_MountRequiredSkill_ReturnsFalse(short skillNumber, string name)
+    public void MayBotOwnSkill_MountRequiredSkill_ReturnsFalse(short skillNumber, string name)
     {
         var skill = new Skill { Number = skillNumber, Name = name, SkillType = SkillType.DirectHit, AttackDamage = 15, NumberOfHitsPerAttack = 1 };
 
-        Assert.That(BotProgression.IsBotLootableSkill(skill), Is.False);
+        Assert.That(BotProgression.MayBotOwnSkill(skill), Is.False);
         Assert.That(BotProgression.RequiresMount(skill), Is.True);
     }
 
@@ -410,11 +410,11 @@ public class BotProgressionTests
     /// </summary>
     [TestCase((short)9, "Evil Spirit", SkillType.AreaSkillAutomaticHits, 45)]
     [TestCase((short)41, "Twisting Slash", SkillType.AreaSkillAutomaticHits, 0)]
-    public void IsBotLootableSkill_OrbGatedAttackSkill_ReturnsTrue(short skillNumber, string name, SkillType skillType, int attackDamage)
+    public void MayBotOwnSkill_OrbGatedAttackSkill_ReturnsTrue(short skillNumber, string name, SkillType skillType, int attackDamage)
     {
         var skill = new Skill { Number = skillNumber, Name = name, SkillType = skillType, AttackDamage = attackDamage, NumberOfHitsPerAttack = 1 };
 
-        Assert.That(BotProgression.IsBotLootableSkill(skill), Is.True);
+        Assert.That(BotProgression.MayBotOwnSkill(skill), Is.True);
     }
 
     /// <summary>
@@ -422,26 +422,26 @@ public class BotProgressionTests
     /// siege-only attacks alike.
     /// </summary>
     [Test]
-    public void IsBotLootableSkill_NonCombatSkill_ReturnsFalse()
+    public void MayBotOwnSkill_NonCombatSkill_ReturnsFalse()
     {
         var summonGoblin = new Skill { Number = 30, Name = "Summon Goblin", SkillType = SkillType.SummonMonster, AttackDamage = 0 };
         var defense = new Skill { Number = 18, Name = "Defense", SkillType = SkillType.Buff, AttackDamage = 0, MagicEffectDef = new MagicEffectDefinition() };
         var crescentMoon = new Skill { Number = 44, Name = "Crescent Moon Slash", SkillType = SkillType.DirectHit, AttackDamage = 90 };
 
-        Assert.That(BotProgression.IsBotLootableSkill(summonGoblin), Is.False);
-        Assert.That(BotProgression.IsBotLootableSkill(defense), Is.False);
-        Assert.That(BotProgression.IsBotLootableSkill(crescentMoon), Is.False);
+        Assert.That(BotProgression.MayBotOwnSkill(summonGoblin), Is.False);
+        Assert.That(BotProgression.MayBotOwnSkill(defense), Is.False);
+        Assert.That(BotProgression.MayBotOwnSkill(crescentMoon), Is.False);
     }
 
     /// <summary>
     /// Tests that a castable class buff with a magic effect is lootable from its orb.
     /// </summary>
     [Test]
-    public void IsBotLootableSkill_CastableBuff_ReturnsTrue()
+    public void MayBotOwnSkill_CastableBuff_ReturnsTrue()
     {
         var greaterDefense = new Skill { Number = 27, Name = "Greater Defense", SkillType = SkillType.Buff, AttackDamage = 0, MagicEffectDef = new MagicEffectDefinition() };
 
-        Assert.That(BotProgression.IsBotLootableSkill(greaterDefense), Is.True);
+        Assert.That(BotProgression.MayBotOwnSkill(greaterDefense), Is.True);
     }
 
     private static (Dictionary<short, List<ItemDefinition>> Grants, CharacterClass CharacterClass, Skill Skill) CreateScrollGrant(byte dropLevel)

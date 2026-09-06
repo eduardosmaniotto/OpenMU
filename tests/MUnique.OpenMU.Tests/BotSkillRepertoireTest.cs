@@ -31,7 +31,7 @@ public class BotSkillRepertoireTest
     {
         var skill = CreateAttackSkill(skillNumber, attackDamage: 120, name: name);
 
-        Assert.That(BotProgression.IsBotLootableSkill(skill), Is.False);
+        Assert.That(BotProgression.MayBotOwnSkill(skill), Is.False);
     }
 
     /// <summary>
@@ -44,7 +44,7 @@ public class BotSkillRepertoireTest
     {
         var stun = CreateAttackSkill(67, attackDamage: 0, skillType: SkillType.AreaSkillAutomaticHits, name: "Stun");
 
-        Assert.That(BotProgression.IsBotLootableSkill(stun), Is.False);
+        Assert.That(BotProgression.MayBotOwnSkill(stun), Is.False);
     }
 
     /// <summary>
@@ -59,7 +59,7 @@ public class BotSkillRepertoireTest
     {
         var chainDrive = CreateAttackSkill(262, attackDamage: 0, hits: 4, name: "Chain Drive");
 
-        Assert.That(BotProgression.IsBotLootableSkill(chainDrive), Is.True);
+        Assert.That(BotProgression.MayBotOwnSkill(chainDrive), Is.True);
     }
 
     /// <summary>
@@ -71,7 +71,7 @@ public class BotSkillRepertoireTest
     {
         var tripleShot = CreateAttackSkill(24, attackDamage: 0, skillType: SkillType.AreaSkillAutomaticHits, name: "Triple Shot");
 
-        Assert.That(BotProgression.IsBotLootableSkill(tripleShot), Is.True);
+        Assert.That(BotProgression.MayBotOwnSkill(tripleShot), Is.True);
     }
 
     /// <summary>
@@ -83,7 +83,7 @@ public class BotSkillRepertoireTest
     {
         var lunge = CreateAttackSkill(20, attackDamage: 0, name: "Lunge");
 
-        Assert.That(BotProgression.IsBotLootableSkill(lunge), Is.False);
+        Assert.That(BotProgression.MayBotOwnSkill(lunge), Is.False);
     }
 
     /// <summary>
@@ -94,7 +94,7 @@ public class BotSkillRepertoireTest
     {
         var evilSpirit = CreateAttackSkill(9, attackDamage: 45, name: "Evil Spirit");
 
-        Assert.That(BotProgression.IsBotLootableSkill(evilSpirit), Is.True);
+        Assert.That(BotProgression.MayBotOwnSkill(evilSpirit), Is.True);
     }
 
     /// <summary>

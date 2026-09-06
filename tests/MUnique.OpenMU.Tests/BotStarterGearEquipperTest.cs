@@ -112,7 +112,13 @@ public class BotStarterGearEquipperTest
 
         var sword = new TestGearItemDefinition { Group = 0, Number = 0, DropLevel = 5, Durability = 10 };
         sword.QualifiedCharacters.Add(characterClass);
-        definitions = new List<ItemDefinition> { sword };
+
+        // A staff the class could wield but its build rejects, at a lower drop level than the sword:
+        // preference must win over availability.
+        var staff = new TestGearItemDefinition { Group = 5, Number = 0, DropLevel = 1, Durability = 10 };
+        staff.QualifiedCharacters.Add(characterClass);
+
+        definitions = new List<ItemDefinition> { sword, staff };
         foreach (var (group, number) in new[] { (7, 5), (8, 5), (9, 5), (10, 5), (11, 5) })
         {
             var piece = new TestGearItemDefinition { Group = (byte)group, Number = (byte)number, DropLevel = 5, Durability = 10 };

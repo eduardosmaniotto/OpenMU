@@ -548,7 +548,7 @@ internal sealed class BotGenerator
         var grantingItems = BotProgression.GetGrantingItems(this._gameContext.Configuration);
         foreach (var skill in this._gameContext.Configuration.Skills)
         {
-            if (!BotProgression.IsBotLootableSkill(skill)
+            if (!BotProgression.MayBotOwnSkill(skill)
                 || !skill.QualifiedCharacters.Contains(characterClass)
                 || !BotProgression.MeetsRequirements(skill, GetValue)
                 || !BotProgression.MayBackfillSkill(skill, grantingItems, characterClass, level, GetValue)

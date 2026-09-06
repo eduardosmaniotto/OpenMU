@@ -238,15 +238,7 @@ internal static class BotShoppingHandler
             }
 
             // Whatever the bot would wear stays: selling a piece it picked up as an upgrade one tick
-            // before it puts it on is pure loss. The same holds for a looted orb or scroll waiting for
-            // the next learn pass (see BotSkillHandler) - it is not an upgrade, so without this guard it
-            // would fall straight through into the junk below. Keeping it out of the junk list also
-            // protects it from being destroyed as unsellable under slot pressure.
-            if (BotSkillHandler.WantsSkillItem(player, item))
-            {
-                continue;
-            }
-
+            // before it puts it on is pure loss.
             if (!BotEquipmentHandler.IsUpgradeFor(player, item))
             {
                 junk.Add(item);
@@ -263,14 +255,24 @@ internal static class BotShoppingHandler
     /// </summary>
     private static async ValueTask<(int Sold, List<Item> Unsold)> SellJunkAsync(OfflinePlayer player, IStorage inventory)
     {
-        var junk = GetSellableJunk(player, inventory)
+        var junk = GetSellableJunk(player, inventory);
+
+        // A looted orb or scroll waiting for the next learn pass is not an upgrade, so the classifier
+        // above files it as junk - pull it back out here, where reading the skill list is safe: this
+        // runs on the MU Helper tick, serialized with the learn pass that mutates it (never on the
+        // navigator's timer, where NeedsShopping only decides whether a trip is worthwhile). Keeping it
+        // out of this list also protects it from being destroyed as unsellable under slot pressure
+        // downstream, which only ever sees what is returned here.
+        junk.RemoveAll(item => BotSkillHandler.WantsSkillItem(player, item));
+
+        var pricedJunk = junk
             .Select(i => (Item: i, Price: PriceCalculator.CalculateSellingPrice(i, i.Durability())))
             .OrderByDescending(x => x.Price)
             .ToList();
 
         var sold = 0;
         var unsold = new List<Item>();
-        foreach (var (item, _) in junk)
+        foreach (var (item, _) in pricedJunk)
         {
             if (await SellAction.SellItemAsync(player, item.ItemSlot).ConfigureAwait(false))
             {
