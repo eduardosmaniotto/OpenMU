@@ -27,7 +27,7 @@ public class BotSkillHandlerTest
     {
         var player = await PlayerTestHelper.CreatePlayerAsync().ConfigureAwait(false);
         var characterClass = player.SelectedCharacter!.CharacterClass!;
-        var (skill, orb) = CreateOrb(characterClass, 9, "Evil Spirit", 12);
+        var (_, orb) = CreateOrb(characterClass, 9, "Evil Spirit", 12);
         var item = new Item { Definition = orb, Durability = 1, ItemSlot = 12 };
 
         Assert.That(BotSkillHandler.WantsSkillItem(player, item), Is.True);
@@ -70,7 +70,7 @@ public class BotSkillHandlerTest
     {
         var player = await PlayerTestHelper.CreatePlayerAsync().ConfigureAwait(false);
         var characterClass = player.SelectedCharacter!.CharacterClass!;
-        var (skill, orb) = CreateOrb(characterClass, 9, "Evil Spirit", 12);
+        var (_, orb) = CreateOrb(characterClass, 9, "Evil Spirit", 12);
         orb.Requirements.Add(new AttributeRequirement { Attribute = Stats.TotalEnergy, MinimumValue = 500 });
         var item = new Item { Definition = orb, Durability = 1, ItemSlot = 12 };
 
