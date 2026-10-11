@@ -1671,6 +1671,7 @@ internal sealed class BasicModelConverter
 
         target.SocketCount = source.SocketCount;
         target.StorePrice = source.StorePrice;
+        target.StorePriceCurrency = source.StorePriceCurrency;
         target.PetExperience = source.PetExperience;
         return target;
     }

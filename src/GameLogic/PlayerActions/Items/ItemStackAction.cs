@@ -42,6 +42,14 @@ public class ItemStackAction
         var jewels = player.Inventory.Items.Where(item => item.Definition == mix.SingleJewel).Take(stackSize).ToList();
         if (jewels.Count == stackSize)
         {
+            // Only the protocol sizes 10/20/30 may produce bundles. Anything else
+            // would wrap the bundle level and corrupt the piece count.
+            if (stackSize is not (10 or 20 or 30))
+            {
+                player.Logger.LogWarning("Invalid stack size [{stackSize}], Player Name: [{characterName}], Account Name: [{accountName}]", stackSize, player.SelectedCharacter?.Name, player.Account?.LoginName);
+                return;
+            }
+
             var fee = GetCombineFee(stackSize);
             if (!player.TryRemoveMoney(fee))
             {
@@ -58,7 +66,7 @@ public class ItemStackAction
 
             var stacked = player.PersistenceContext.CreateNew<Item>();
             stacked.Definition = mix.MixedJewel;
-            stacked.Level = (byte)((stackSize / 10) - 1);
+            stacked.Level = JewelBundleHelper.GetBundleLevel(stackSize);
             stacked.Durability = 1;
             await player.Inventory.AddItemAsync(stacked).ConfigureAwait(false);
             await player.InvokeViewPlugInAsync<IItemAppearPlugIn>(p => p.ItemAppearAsync(stacked)).ConfigureAwait(false);
@@ -103,13 +111,20 @@ public class ItemStackAction
             return;
         }
 
+        if (!JewelBundleHelper.TryGetPieceCount(stacked.Level, out var pieceCount))
+        {
+            player.Logger.LogWarning("Stacked jewel with unexpected level [{level}] in slot [{slot}], Player Name: [{characterName}]", stacked.Level, slot, player.SelectedCharacter?.Name);
+            await player.ShowLocalizedBlueMessageAsync(nameof(PlayerMessage.SelectedItemIsNotStackedJewel)).ConfigureAwait(false);
+            return;
+        }
+
         if (!player.TryRemoveMoney(DismantleFee))
         {
             await player.ShowLocalizedBlueMessageAsync(nameof(PlayerMessage.NotEnoughMoney)).ConfigureAwait(false);
             return;
         }
 
-        byte pieces = (byte)((stacked.Level + 1) * 10);
+        byte pieces = (byte)pieceCount;
 
         var freeSlots = player.Inventory!.FreeSlots.Take(pieces).ToList();
         if (freeSlots.Count < pieces)

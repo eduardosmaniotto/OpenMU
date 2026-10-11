@@ -2143,6 +2143,12 @@
   <data name="Item_StorePrice_Description" xml:space="preserve">
     <value></value>
   </data>
+  <data name="Item_StorePriceCurrency_Caption" xml:space="preserve">
+    <value>Store Price Currency</value>
+  </data>
+  <data name="Item_StorePriceCurrency_Description" xml:space="preserve">
+    <value></value>
+  </data>
   <data name="Item_PetExperience_Caption" xml:space="preserve">
     <value>Pet Experience</value>
   </data>

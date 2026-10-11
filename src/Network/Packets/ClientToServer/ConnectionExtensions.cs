@@ -368,6 +368,38 @@ public static class ConnectionExtensions
     }
 
     /// <summary>
+    /// Sends a <see cref="PlayerShopSetItemPriceExtended" /> to this connection.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <param name="itemSlot">The item slot.</param>
+    /// <param name="currency">The currency of the price. The values match the shop currencies known by the server.</param>
+    /// <param name="price">The price.</param>
+    /// <remarks>
+    /// Is sent by the client when: The player wants to set a price of an item in his personal item shop, expressed in a specific currency (Zen, jewels, or account coins). Only sent by the extended client.
+    /// Causes reaction on server side: The price and currency are set for the specified item. Works only if the shop is currently closed and the multi-currency shop feature is active.
+    /// </remarks>
+    public static async ValueTask SendPlayerShopSetItemPriceExtendedAsync(this IConnection? connection, byte @itemSlot, PlayerShopSetItemPriceExtended.ShopCurrencyType @currency, uint @price)
+    {
+        if (connection is null)
+        {
+            return;
+        }
+
+        int WritePacket()
+        {
+            var length = PlayerShopSetItemPriceExtendedRef.Length;
+            var packet = new PlayerShopSetItemPriceExtendedRef(connection.Output.GetSpan(length)[..length]);
+            packet.ItemSlot = @itemSlot;
+            packet.Currency = @currency;
+            packet.Price = @price;
+
+            return packet.Header.Length;
+        }
+
+        await connection.SendAsync(WritePacket).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Sends a <see cref="PlayerShopOpen" /> to this connection.
     /// </summary>
     /// <param name="connection">The connection.</param>

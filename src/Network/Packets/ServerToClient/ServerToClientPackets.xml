@@ -54,7 +54,7 @@
           <Index>4</Index>
           <Type>ShortLittleEndian</Type>
           <Name>PriceItemType</Name>
-          <Description>Contains the item group in the highest 4 bits, and the item number in the remaining ones.</Description>
+          <Description>Contains the item group in the highest 4 bits, and the item number in the remaining ones. The reserved values 0xFFF0 (WCoin C), 0xFFF1 (WCoin P) and 0xFFF2 (Goblin Points) price the item in account coins instead; the amount is in MoneyPrice then.</Description>
         </Field>
         <Field>
           <Index>6</Index>
@@ -11693,6 +11693,25 @@
 				</Enum>
 			</Enums>
 		</Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>3F</Code>
+      <SubCode>0A</SubCode>
+      <Name>PlayerShopCurrenciesExtended</Name>
+      <Caption>Player Shop - Available Currencies (Extended)</Caption>
+      <Length>8</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the player opened his own personal shop or requested the shop of another player, if the client supports extended shop packets.</SentWhen>
+      <CausedReaction>The client only offers the enabled currencies when the player sets a price or browses prices. A mask of zero means the feature is deactivated and only Zen can be used. The server still validates every price and purchase against its configuration.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>CurrencyMask</Name>
+          <Description>One bit per shop currency value; bit N set means the currency with value N may be used for prices. Bit 0 (Zen) is always set when the feature is enabled, a zero mask means it is deactivated. Additional bits are reserved for other features which price things in shop currencies.</Description>
+        </Field>
+      </Fields>
+    </Packet>
     <Packet>
       <HeaderType>C1Header</HeaderType>
       <Code>0B</Code>

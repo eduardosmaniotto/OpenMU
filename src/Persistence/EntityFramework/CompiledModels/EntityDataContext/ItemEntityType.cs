@@ -23,7 +23,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForEntityDat
                 "MUnique.OpenMU.Persistence.EntityFramework.Model.Item",
                 typeof(MUnique.OpenMU.Persistence.EntityFramework.Model.Item),
                 baseEntityType,
-                propertyCount: 10,
+                propertyCount: 11,
                 navigationCount: 4,
                 foreignKeyCount: 2,
                 unnamedIndexCount: 2,
@@ -111,6 +111,14 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForEntityDat
                 fieldInfo: typeof(MUnique.OpenMU.DataModel.Entities.Item).GetField("<StorePrice>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 nullable: true);
             storePrice.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
+
+            var storePriceCurrency = runtimeEntityType.AddProperty(
+                "StorePriceCurrency",
+                typeof(MUnique.OpenMU.DataModel.Entities.PlayerShopCurrency),
+                propertyInfo: typeof(MUnique.OpenMU.DataModel.Entities.Item).GetProperty("StorePriceCurrency", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                fieldInfo: typeof(MUnique.OpenMU.DataModel.Entities.Item).GetField("<StorePriceCurrency>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+            storePriceCurrency.SetSentinelFromProviderValue(0);
+            storePriceCurrency.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
             var key = runtimeEntityType.AddKey(
                 new[] { id });

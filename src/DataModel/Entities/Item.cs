@@ -59,8 +59,17 @@ public partial class Item
 
     /// <summary>
     /// Gets or sets the price which was set by the player for his personal store.
+    /// The meaning of the value depends on <see cref="StorePriceCurrency"/>:
+    /// Zen money, jewel count, or account coin amount.
     /// </summary>
     public int? StorePrice { get; set; }
+
+    /// <summary>
+    /// Gets or sets the currency of <see cref="StorePrice"/>.
+    /// Defaults to <see cref="PlayerShopCurrency.Zen"/>, so rows written
+    /// before this feature read as Zen without a data fix.
+    /// </summary>
+    public PlayerShopCurrency StorePriceCurrency { get; set; }
 
     /// <summary>
     /// Gets or sets the pet experience.

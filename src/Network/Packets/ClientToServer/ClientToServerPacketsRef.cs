@@ -1088,6 +1088,110 @@ public readonly ref struct PlayerShopSetItemPriceRef
 
 
 /// <summary>
+/// Is sent by the client when: The player wants to set a price of an item in his personal item shop, expressed in a specific currency (Zen, jewels, or account coins). Only sent by the extended client.
+/// Causes reaction on server side: The price and currency are set for the specified item. Works only if the shop is currently closed and the multi-currency shop feature is active.
+/// </summary>
+public readonly ref struct PlayerShopSetItemPriceExtendedRef
+{
+    private readonly Span<byte> _data;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PlayerShopSetItemPriceExtendedRef"/> struct.
+    /// </summary>
+    /// <param name="data">The underlying data.</param>
+    public PlayerShopSetItemPriceExtendedRef(Span<byte> data)
+        : this(data, true)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PlayerShopSetItemPriceExtendedRef"/> struct.
+    /// </summary>
+    /// <param name="data">The underlying data.</param>
+    /// <param name="initialize">If set to <c>true</c>, the header data is automatically initialized and written to the underlying span.</param>
+    private PlayerShopSetItemPriceExtendedRef(Span<byte> data, bool initialize)
+    {
+        this._data = data;
+        if (initialize)
+        {
+            var header = this.Header;
+            header.Type = HeaderType;
+            header.Code = Code;
+            header.Length = (byte)Math.Min(data.Length, Length);
+            header.SubCode = SubCode;
+        }
+    }
+
+    /// <summary>
+    /// Gets the header type of this data packet.
+    /// </summary>
+    public static byte HeaderType => 0xC3;
+
+    /// <summary>
+    /// Gets the operation code of this data packet.
+    /// </summary>
+    public static byte Code => 0x3F;
+
+    /// <summary>
+    /// Gets the operation sub-code of this data packet.
+    /// The <see cref="Code" /> is used as a grouping key.
+    /// </summary>
+    public static byte SubCode => 0x09;
+
+    /// <summary>
+    /// Gets the initial length of this data packet. When the size is dynamic, this value may be bigger than actually needed.
+    /// </summary>
+    public static int Length => 10;
+
+    /// <summary>
+    /// Gets the header of this packet.
+    /// </summary>
+    public C3HeaderWithSubCodeRef Header => new (this._data);
+
+    /// <summary>
+    /// Gets or sets the item slot.
+    /// </summary>
+    public byte ItemSlot
+    {
+        get => this._data[4];
+        set => this._data[4] = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the currency of the price. The values match the shop currencies known by the server.
+    /// </summary>
+    public PlayerShopSetItemPriceExtended.ShopCurrencyType Currency
+    {
+        get => (PlayerShopSetItemPriceExtended.ShopCurrencyType)this._data[5];
+        set => this._data[5] = (byte)value;
+    }
+
+    /// <summary>
+    /// Gets or sets the price.
+    /// </summary>
+    public uint Price
+    {
+        get => ReadUInt32LittleEndian(this._data[6..]);
+        set => WriteUInt32LittleEndian(this._data[6..], value);
+    }
+
+    /// <summary>
+    /// Performs an implicit conversion from a Span of bytes to a <see cref="PlayerShopSetItemPriceExtended"/>.
+    /// </summary>
+    /// <param name="packet">The packet as span.</param>
+    /// <returns>The packet as struct.</returns>
+    public static implicit operator PlayerShopSetItemPriceExtendedRef(Span<byte> packet) => new (packet, false);
+
+    /// <summary>
+    /// Performs an implicit conversion from <see cref="PlayerShopSetItemPriceExtended"/> to a Span of bytes.
+    /// </summary>
+    /// <param name="packet">The packet as struct.</param>
+    /// <returns>The packet as byte span.</returns>
+    public static implicit operator Span<byte>(PlayerShopSetItemPriceExtendedRef packet) => packet._data; 
+}
+
+
+/// <summary>
 /// Is sent by the client when: The player wants to open his personal item shop.
 /// Causes reaction on server side: The personal item shop is opened and the surrounding players are informed about it, including the own player.
 /// </summary>

@@ -4,8 +4,8 @@
 
 namespace MUnique.OpenMU.GameServer.MessageHandler.Items;
 
-using System.ComponentModel;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.Logging;
 using MUnique.OpenMU.GameLogic;
 using MUnique.OpenMU.GameLogic.PlayerActions.Items;
 using MUnique.OpenMU.Network.Packets.ClientToServer;
@@ -39,24 +39,41 @@ internal class JewelMixHandlerPlugIn : IPacketHandlerPlugIn
         switch (message.Operation)
         {
             case LahapJewelMixRequest.MixType.Mix:
-                await this._mixAction.StackItemsAsync(player, (byte)message.Item, GetStackSize(message.MixingStackSize)).ConfigureAwait(false);
+                if (TryGetStackSize(message.MixingStackSize, out var stackSize))
+                {
+                    await this._mixAction.StackItemsAsync(player, (byte)message.Item, stackSize).ConfigureAwait(false);
+                }
+                else
+                {
+                    player.Logger.LogWarning("Unknown jewel mix stack size: {stackSize}, possible hacker", message.MixingStackSize);
+                }
+
                 break;
             case LahapJewelMixRequest.MixType.Unmix:
                 await this._mixAction.UnstackItemsAsync(player, (byte)message.Item, message.UnmixingSourceSlot).ConfigureAwait(false);
                 break;
             default:
-                throw new ArgumentException($"The mix operation {message.Operation} is unknown.");
+                player.Logger.LogWarning("Unknown jewel mix operation: {operation}, possible hacker", message.Operation);
+                break;
         }
     }
 
-    private static byte GetStackSize(LahapJewelMixRequest.StackSize stackSize)
+    private static bool TryGetStackSize(LahapJewelMixRequest.StackSize stackSize, out byte size)
     {
-        return stackSize switch
+        switch (stackSize)
         {
-            LahapJewelMixRequest.StackSize.Ten => 10,
-            LahapJewelMixRequest.StackSize.Twenty => 20,
-            LahapJewelMixRequest.StackSize.Thirty => 30,
-            _ => throw new InvalidEnumArgumentException(nameof(stackSize), (int)stackSize, typeof(LahapJewelMixRequest.StackSize)),
-        };
+            case LahapJewelMixRequest.StackSize.Ten:
+                size = 10;
+                return true;
+            case LahapJewelMixRequest.StackSize.Twenty:
+                size = 20;
+                return true;
+            case LahapJewelMixRequest.StackSize.Thirty:
+                size = 30;
+                return true;
+            default:
+                size = 0;
+                return false;
+        }
     }
 }

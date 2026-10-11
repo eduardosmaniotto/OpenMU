@@ -292,6 +292,89 @@
     <Packet>
       <HeaderType>C3HeaderWithSubCode</HeaderType>
       <Code>3F</Code>
+      <SubCode>09</SubCode>
+      <Name>PlayerShopSetItemPriceExtended</Name>
+      <Caption>Player Shop - Set Item Price (Extended)</Caption>
+      <Length>10</Length>
+      <Direction>ClientToServer</Direction>
+      <SentWhen>The player wants to set a price of an item in his personal item shop, expressed in a specific currency (Zen, jewels, or account coins). Only sent by the extended client.</SentWhen>
+      <CausedReaction>The price and currency are set for the specified item. Works only if the shop is currently closed and the multi-currency shop feature is active.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>ItemSlot</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Enum</Type>
+          <TypeName>ShopCurrencyType</TypeName>
+          <Name>Currency</Name>
+          <Description>The currency of the price. The values match the shop currencies known by the server.</Description>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>Price</Name>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>ShopCurrencyType</Name>
+          <Description>The currency of a personal shop price. The values match the shop currencies known by the server.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Zen</Name>
+              <Description>Zen (game money).</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>JewelOfBless</Name>
+              <Description>Jewel of Bless.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>JewelOfSoul</Name>
+              <Description>Jewel of Soul.</Description>
+              <Value>2</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>JewelOfChaos</Name>
+              <Description>Jewel of Chaos.</Description>
+              <Value>3</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>JewelOfCreation</Name>
+              <Description>Jewel of Creation.</Description>
+              <Value>4</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>JewelOfLife</Name>
+              <Description>Jewel of Life.</Description>
+              <Value>5</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>WCoinC</Name>
+              <Description>WCoin (C) account balance.</Description>
+              <Value>6</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>WCoinP</Name>
+              <Description>WCoin (P) account balance.</Description>
+              <Value>7</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>GoblinPoints</Name>
+              <Description>Goblin Points account balance.</Description>
+              <Value>8</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C3HeaderWithSubCode</HeaderType>
+      <Code>3F</Code>
       <SubCode>02</SubCode>
       <Name>PlayerShopOpen</Name>
       <Caption>Player Shop - Open</Caption>

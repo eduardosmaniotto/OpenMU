@@ -6653,6 +6653,24 @@ public class PacketStructureTests
     }
 
     /// <summary>
+    /// Tests the packet size calculation for PlayerShopCurrenciesExtended.
+    /// </summary>
+    [Test]
+    public void PlayerShopCurrenciesExtended_PacketSizeValidation()
+    {
+        // Fixed-length packet validation
+        const int expectedLength = 8;
+        var actualLength = PlayerShopCurrenciesExtendedRef.Length;
+        
+        Assert.That(actualLength, Is.EqualTo(expectedLength), 
+            "Packet length mismatch: declared length does not match calculated size");
+        
+        // Validate field 'CurrencyMask' boundary
+        Assert.That(4 + 4, Is.LessThanOrEqualTo(expectedLength), 
+            "Field 'CurrencyMask' exceeds packet boundary");
+    }
+
+    /// <summary>
     /// Tests the packet size calculation for MapEventState.
     /// </summary>
     [Test]

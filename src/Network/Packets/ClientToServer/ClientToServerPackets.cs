@@ -1088,6 +1088,161 @@ public readonly struct PlayerShopSetItemPrice
 
 
 /// <summary>
+/// Is sent by the client when: The player wants to set a price of an item in his personal item shop, expressed in a specific currency (Zen, jewels, or account coins). Only sent by the extended client.
+/// Causes reaction on server side: The price and currency are set for the specified item. Works only if the shop is currently closed and the multi-currency shop feature is active.
+/// </summary>
+public readonly struct PlayerShopSetItemPriceExtended
+{
+    /// <summary>
+    /// The currency of a personal shop price. The values match the shop currencies known by the server.
+    /// </summary>
+    public enum ShopCurrencyType
+    {
+        /// <summary>
+        /// Zen (game money).
+        /// </summary>
+            Zen = 0,
+
+        /// <summary>
+        /// Jewel of Bless.
+        /// </summary>
+            JewelOfBless = 1,
+
+        /// <summary>
+        /// Jewel of Soul.
+        /// </summary>
+            JewelOfSoul = 2,
+
+        /// <summary>
+        /// Jewel of Chaos.
+        /// </summary>
+            JewelOfChaos = 3,
+
+        /// <summary>
+        /// Jewel of Creation.
+        /// </summary>
+            JewelOfCreation = 4,
+
+        /// <summary>
+        /// Jewel of Life.
+        /// </summary>
+            JewelOfLife = 5,
+
+        /// <summary>
+        /// WCoin (C) account balance.
+        /// </summary>
+            WCoinC = 6,
+
+        /// <summary>
+        /// WCoin (P) account balance.
+        /// </summary>
+            WCoinP = 7,
+
+        /// <summary>
+        /// Goblin Points account balance.
+        /// </summary>
+            GoblinPoints = 8,
+    }
+
+    private readonly Memory<byte> _data;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PlayerShopSetItemPriceExtended"/> struct.
+    /// </summary>
+    /// <param name="data">The underlying data.</param>
+    public PlayerShopSetItemPriceExtended(Memory<byte> data)
+        : this(data, true)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PlayerShopSetItemPriceExtended"/> struct.
+    /// </summary>
+    /// <param name="data">The underlying data.</param>
+    /// <param name="initialize">If set to <c>true</c>, the header data is automatically initialized and written to the underlying span.</param>
+    private PlayerShopSetItemPriceExtended(Memory<byte> data, bool initialize)
+    {
+        this._data = data;
+        if (initialize)
+        {
+            var header = this.Header;
+            header.Type = HeaderType;
+            header.Code = Code;
+            header.Length = (byte)Math.Min(data.Length, Length);
+            header.SubCode = SubCode;
+        }
+    }
+
+    /// <summary>
+    /// Gets the header type of this data packet.
+    /// </summary>
+    public static byte HeaderType => 0xC3;
+
+    /// <summary>
+    /// Gets the operation code of this data packet.
+    /// </summary>
+    public static byte Code => 0x3F;
+
+    /// <summary>
+    /// Gets the operation sub-code of this data packet.
+    /// The <see cref="Code" /> is used as a grouping key.
+    /// </summary>
+    public static byte SubCode => 0x09;
+
+    /// <summary>
+    /// Gets the initial length of this data packet. When the size is dynamic, this value may be bigger than actually needed.
+    /// </summary>
+    public static int Length => 10;
+
+    /// <summary>
+    /// Gets the header of this packet.
+    /// </summary>
+    public C3HeaderWithSubCode Header => new (this._data);
+
+    /// <summary>
+    /// Gets or sets the item slot.
+    /// </summary>
+    public byte ItemSlot
+    {
+        get => this._data.Span[4];
+        set => this._data.Span[4] = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the currency of the price. The values match the shop currencies known by the server.
+    /// </summary>
+    public PlayerShopSetItemPriceExtended.ShopCurrencyType Currency
+    {
+        get => (ShopCurrencyType)this._data.Span[5];
+        set => this._data.Span[5] = (byte)value;
+    }
+
+    /// <summary>
+    /// Gets or sets the price.
+    /// </summary>
+    public uint Price
+    {
+        get => ReadUInt32LittleEndian(this._data.Span[6..]);
+        set => WriteUInt32LittleEndian(this._data.Span[6..], value);
+    }
+
+    /// <summary>
+    /// Performs an implicit conversion from a Memory of bytes to a <see cref="PlayerShopSetItemPriceExtended"/>.
+    /// </summary>
+    /// <param name="packet">The packet as span.</param>
+    /// <returns>The packet as struct.</returns>
+    public static implicit operator PlayerShopSetItemPriceExtended(Memory<byte> packet) => new (packet, false);
+
+    /// <summary>
+    /// Performs an implicit conversion from <see cref="PlayerShopSetItemPriceExtended"/> to a Memory of bytes.
+    /// </summary>
+    /// <param name="packet">The packet as struct.</param>
+    /// <returns>The packet as byte span.</returns>
+    public static implicit operator Memory<byte>(PlayerShopSetItemPriceExtended packet) => packet._data; 
+}
+
+
+/// <summary>
 /// Is sent by the client when: The player wants to open his personal item shop.
 /// Causes reaction on server side: The personal item shop is opened and the surrounding players are informed about it, including the own player.
 /// </summary>

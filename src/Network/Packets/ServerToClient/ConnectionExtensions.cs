@@ -6605,6 +6605,34 @@ public static class ConnectionExtensions
     }
 
     /// <summary>
+    /// Sends a <see cref="PlayerShopCurrenciesExtended" /> to this connection.
+    /// </summary>
+    /// <param name="connection">The connection.</param>
+    /// <param name="currencyMask">One bit per shop currency value; bit N set means the currency with value N may be used for prices. Bit 0 (Zen) is always set when the feature is enabled, a zero mask means it is deactivated. Additional bits are reserved for other features which price things in shop currencies.</param>
+    /// <remarks>
+    /// Is sent by the server when: After the player opened his own personal shop or requested the shop of another player, if the client supports extended shop packets.
+    /// Causes reaction on client side: The client only offers the enabled currencies when the player sets a price or browses prices. A mask of zero means the feature is deactivated and only Zen can be used. The server still validates every price and purchase against its configuration.
+    /// </remarks>
+    public static async ValueTask SendPlayerShopCurrenciesExtendedAsync(this IConnection? connection, uint @currencyMask)
+    {
+        if (connection is null)
+        {
+            return;
+        }
+
+        int WritePacket()
+        {
+            var length = PlayerShopCurrenciesExtendedRef.Length;
+            var packet = new PlayerShopCurrenciesExtendedRef(connection.Output.GetSpan(length)[..length]);
+            packet.CurrencyMask = @currencyMask;
+
+            return packet.Header.Length;
+        }
+
+        await connection.SendAsync(WritePacket).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Sends a <see cref="MapEventState" /> to this connection.
     /// </summary>
     /// <param name="connection">The connection.</param>

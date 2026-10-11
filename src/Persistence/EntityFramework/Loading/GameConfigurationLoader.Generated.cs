@@ -71,7 +71,7 @@ internal sealed partial class GameConfigurationLoader
         "select \"Id\", \"AddPercentage\", \"FailResult\", \"MaximumAmount\", \"MaximumItemLevel\", \"MinimumAmount\", \"MinimumItemLevel\", \"NpcPriceDivisor\", \"Reference\", \"SimpleCraftingSettingsId\", \"SuccessResult\" from config.\"ItemCraftingRequiredItem\"",
         "select \"Id\", \"AddLevel\", \"Durability\", \"ItemDefinitionId\", \"RandomMaximumLevel\", \"RandomMinimumLevel\", \"Reference\", \"SimpleCraftingSettingsId\" from config.\"ItemCraftingResultItem\"",
         "select \"Id\", \"Money\" from data.\"ItemStorage\" where (\"Id\" in (select \"MerchantStoreId\" from config.\"MonsterDefinition\"))",
-        "select \"Id\", \"DefinitionId\", \"Durability\", \"HasSkill\", \"ItemSlot\", \"ItemStorageId\", \"Level\", \"PetExperience\", \"SocketCount\", \"StorePrice\" from data.\"Item\" where (\"ItemStorageId\" in (select \"Id\" from (select * from data.\"ItemStorage\" where (\"Id\" in (select \"MerchantStoreId\" from config.\"MonsterDefinition\"))) \"ItemStorage\") or \"Id\" in (select \"ItemRewardId\" from config.\"QuestReward\"))",
+        "select \"Id\", \"DefinitionId\", \"Durability\", \"HasSkill\", \"ItemSlot\", \"ItemStorageId\", \"Level\", \"PetExperience\", \"SocketCount\", \"StorePrice\", \"StorePriceCurrency\" from data.\"Item\" where (\"ItemStorageId\" in (select \"Id\" from (select * from data.\"ItemStorage\" where (\"Id\" in (select \"MerchantStoreId\" from config.\"MonsterDefinition\"))) \"ItemStorage\") or \"Id\" in (select \"ItemRewardId\" from config.\"QuestReward\"))",
         "select \"Id\", \"Index\", \"ItemId\", \"ItemOptionId\", \"Level\" from data.\"ItemOptionLink\" where (\"ItemId\" in (select \"Id\" from (select * from data.\"Item\" where (\"ItemStorageId\" in (select \"Id\" from (select * from data.\"ItemStorage\" where (\"Id\" in (select \"MerchantStoreId\" from config.\"MonsterDefinition\"))) \"ItemStorage\") or \"Id\" in (select \"ItemRewardId\" from config.\"QuestReward\"))) \"Item\"))",
         "select \"Id\", \"Group\", \"MaximumCharacterLevel\", \"MinimumCharacterLevel\", \"MonsterDefinitionId\", \"Name\", \"Number\", \"QualifiedCharacterId\", \"QuestGiverId\", \"RefuseNumber\", \"Repeatable\", \"RequiredStartMoney\", \"RequiresClientAction\", \"StartingNumber\" from config.\"QuestDefinition\"",
         "select \"Id\", \"DropItemGroupId\", \"ItemId\", \"MinimumNumber\", \"QuestDefinitionId\" from config.\"QuestItemRequirement\"",
@@ -1381,6 +1381,7 @@ internal sealed partial class GameConfigurationLoader
             entity.PetExperience = reader.GetInt32(7);
             entity.SocketCount = reader.GetInt32(8);
             if (!reader.IsDBNull(9)) { entity.StorePrice = reader.GetInt32(9); }
+            entity.StorePriceCurrency = (global::MUnique.OpenMU.DataModel.Entities.PlayerShopCurrency)reader.GetInt32(10);
             this._Item[entity.Id] = entity;
             this._ItemRows.Add((entity, reader.IsDBNull(1) ? null : reader.GetGuid(1), reader.IsDBNull(5) ? null : reader.GetGuid(5)));
         }
