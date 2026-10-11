@@ -1771,6 +1771,24 @@ namespace MUnique.OpenMU.GameLogic.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Allows personal shop prices in jewels and account coins in addition to Zen. Disabled by default; non-Zen items require the extended client and are hidden from vanilla clients..
+        /// </summary>
+        public static string MultiCurrencyPlayerShopFeaturePlugIn_Description {
+            get {
+                return ResourceManager.GetString("MultiCurrencyPlayerShopFeaturePlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Personal shop with multiple currencies.
+        /// </summary>
+        public static string MultiCurrencyPlayerShopFeaturePlugIn_Name {
+            get {
+                return ResourceManager.GetString("MultiCurrencyPlayerShopFeaturePlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This value is applied per pay interval and multiplied with the total character level..
         /// </summary>
         public static string MuHelperConfiguration_CostPerStage_Description {
@@ -2966,6 +2984,24 @@ namespace MUnique.OpenMU.GameLogic.Properties {
         public static string ShieldRecoveryHiatusPlugIn_Name {
             get {
                 return ResourceManager.GetString("ShieldRecoveryHiatusPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sets the price of a personal store item in any enabled currency, e.g. /shopprice 12 10 bless. Works with vanilla clients which can&apos;t send the extended price packet..
+        /// </summary>
+        public static string ShopPriceChatCommandPlugIn_Description {
+            get {
+                return ResourceManager.GetString("ShopPriceChatCommandPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Shop price chat command.
+        /// </summary>
+        public static string ShopPriceChatCommandPlugIn_Name {
+            get {
+                return ResourceManager.GetString("ShopPriceChatCommandPlugIn_Name", resourceCulture);
             }
         }
         

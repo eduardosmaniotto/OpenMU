@@ -5,6 +5,7 @@
 namespace MUnique.OpenMU.GameServer.RemoteView.PlayerShop;
 
 using System.Runtime.InteropServices;
+using MUnique.OpenMU.DataModel.Entities;
 using MUnique.OpenMU.GameLogic;
 using MUnique.OpenMU.GameLogic.Views;
 using MUnique.OpenMU.GameLogic.Views.PlayerShop;
@@ -42,7 +43,12 @@ public class ShowShopItemListPlugIn : IShowShopItemListPlugIn
 
         var itemSerializer = this._player.ItemSerializer;
         var playerId = requestedPlayer.GetId(this._player);
-        var items = requestedPlayer.ShopStorage.Items.ToList();
+
+        // Vanilla clients only understand Zen prices. Non-Zen items are hidden
+        // from them; the buy action additionally rejects such purchases server-side.
+        var items = requestedPlayer.ShopStorage.Items
+            .Where(item => item.StorePriceCurrency == PlayerShopCurrency.Zen)
+            .ToList();
         int Write()
         {
             var size = PlayerShopItemListRef.GetRequiredSize(items.Count);

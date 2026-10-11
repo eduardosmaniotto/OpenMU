@@ -72,6 +72,9 @@ public class RemotePlayer : Player, IClientVersionProvider, IHasIpAddress
         }
     }
 
+    /// <inheritdoc />
+    public override bool SupportsMultiCurrencyShop => this.ClientVersion.Season >= ExtendedShopClient.Season;
+
     /// <summary>
     /// Gets the connection.
     /// </summary>

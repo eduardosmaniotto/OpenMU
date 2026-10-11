@@ -1479,6 +1479,12 @@
   <data name="PlayerShopOpenedPlugIn_Description" xml:space="preserve">
     <value>The default implementation of the IPlayerShopOpenedPlugIn which is forwarding everything to the game client with specific data packets.</value>
   </data>
+  <data name="ShowShopCurrenciesPlugIn_Name" xml:space="preserve">
+    <value>Show Shop Currencies Extended</value>
+  </data>
+  <data name="ShowShopCurrenciesPlugIn_Description" xml:space="preserve">
+    <value>The extended implementation of the IShowShopCurrenciesPlugIn which informs the client about the enabled shop currencies.</value>
+  </data>
   <data name="ShowShopItemListExtendedPlugIn_Name" xml:space="preserve">
     <value>Show Shop Item List Extended</value>
   </data>
@@ -2258,6 +2264,12 @@
   </data>
   <data name="PlayerShopSetItemPricePacketHandlerPlugIn_Description" xml:space="preserve">
     <value>Packet handler which sets prices for an item in the player shop (3F 01).</value>
+  </data>
+  <data name="PlayerShopSetItemPriceExtendedPacketHandlerPlugIn_Name" xml:space="preserve">
+    <value>Player Shop - Set Price (Extended)</value>
+  </data>
+  <data name="PlayerShopSetItemPriceExtendedPacketHandlerPlugIn_Description" xml:space="preserve">
+    <value>Packet handler which sets prices with currency for an item in the player shop (3F 09). Only for the extended client.</value>
   </data>
   <data name="ActiveQuestListRequestHandlerPlugIn_Name" xml:space="preserve">
     <value>Quest - Request active quests list</value>

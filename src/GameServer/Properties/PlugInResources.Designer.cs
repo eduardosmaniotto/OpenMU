@@ -4777,6 +4777,24 @@ namespace MUnique.OpenMU.GameServer.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Packet handler which sets prices with currency for an item in the player shop (3F 09). Only for the extended client..
+        /// </summary>
+        public static string PlayerShopSetItemPriceExtendedPacketHandlerPlugIn_Description {
+            get {
+                return ResourceManager.GetString("PlayerShopSetItemPriceExtendedPacketHandlerPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Player Shop - Set Price (Extended).
+        /// </summary>
+        public static string PlayerShopSetItemPriceExtendedPacketHandlerPlugIn_Name {
+            get {
+                return ResourceManager.GetString("PlayerShopSetItemPriceExtendedPacketHandlerPlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The default implementation of the IQuestCancelledPlugIn which is forwarding everything to the game client with specific data packets..
         /// </summary>
         public static string QuestCancelledPlugIn_Description {
@@ -6357,6 +6375,24 @@ namespace MUnique.OpenMU.GameServer.Properties {
         public static string ShowRageAttackRangePlugIn_Name {
             get {
                 return ResourceManager.GetString("ShowRageAttackRangePlugIn_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The extended implementation of the IShowShopCurrenciesPlugIn which informs the client about the enabled shop currencies..
+        /// </summary>
+        public static string ShowShopCurrenciesPlugIn_Description {
+            get {
+                return ResourceManager.GetString("ShowShopCurrenciesPlugIn_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show Shop Currencies Extended.
+        /// </summary>
+        public static string ShowShopCurrenciesPlugIn_Name {
+            get {
+                return ResourceManager.GetString("ShowShopCurrenciesPlugIn_Name", resourceCulture);
             }
         }
         

@@ -23,6 +23,7 @@ using MUnique.OpenMU.GameLogic.Views.Character;
 using MUnique.OpenMU.GameLogic.Views.Guild;
 using MUnique.OpenMU.GameLogic.Views.Inventory;
 using MUnique.OpenMU.GameLogic.Views.MuHelper;
+using MUnique.OpenMU.GameLogic.Views.PlayerShop;
 using MUnique.OpenMU.GameLogic.Views.Quest;
 using MUnique.OpenMU.GameLogic.Views.World;
 using MUnique.OpenMU.Interfaces;
@@ -631,6 +632,12 @@ public class Player : AsyncDisposable, IBucketMapObserver, IAttackable, IAttacke
     /// Gets or sets the timestamp of when the shield hiatus was last accrued.
     /// </summary>
     public DateTime LastShieldRecoveryHiatusAccrual { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// Gets a value indicating whether the client of this player supports multi-currency shop item lists.
+    /// The base player (e.g. in tests) doesn't; <c>RemotePlayer</c> overrides it from the client version.
+    /// </summary>
+    public virtual bool SupportsMultiCurrencyShop => false;
 
     /// <summary>
     /// Gets a value indicating whether opening the player store after entering the game is supported by this instance.
@@ -2015,6 +2022,10 @@ public class Player : AsyncDisposable, IBucketMapObserver, IAttackable, IAttacke
 
         await this.InvokeViewPlugInAsync<IUpdateCharacterStatsPlugIn>(p => p.UpdateCharacterStatsAsync()).ConfigureAwait(false);
         await this.InvokeViewPlugInAsync<IUpdateInventoryListPlugIn>(p => p.UpdateInventoryListAsync()).ConfigureAwait(false);
+
+        // Sellers price items while their shop is closed, before the shop-open push below ever arrives.
+        // Sending the available shop currencies up-front lets extended clients offer them in the price dialog.
+        await this.InvokeViewPlugInAsync<IShowShopCurrenciesPlugIn>(p => p.ShowShopCurrenciesAsync()).ConfigureAwait(false);
         await this.InvokeViewPlugInAsync<ISkillListViewPlugIn>(p => p.UpdateSkillListAsync()).ConfigureAwait(false);
         await this.InvokeViewPlugInAsync<IApplyKeyConfigurationPlugIn>(p => p.ApplyKeyConfigurationAsync()).ConfigureAwait(false);
         await this.InvokeViewPlugInAsync<IQuestStateResponsePlugIn>(p => p.ShowQuestStateAsync(null)).ConfigureAwait(false); // Legacy quest system

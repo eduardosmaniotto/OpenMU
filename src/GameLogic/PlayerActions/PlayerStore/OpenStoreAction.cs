@@ -33,6 +33,14 @@ public class OpenStoreAction
             return;
         }
 
+        var disallowed = player.ShopStorage?.Items.FirstOrDefault(i => !MultiCurrencyPlayerShopFeaturePlugIn.IsCurrencyAllowed(player.GameContext, i.StorePriceCurrency));
+        if (disallowed is not null)
+        {
+            player.Logger.LogWarning("OpenStore request failed: Item in slot {0} is priced in a disabled currency ({1}). Player: [{2}]", disallowed.ItemSlot, disallowed.StorePriceCurrency, character.Name);
+            await player.ShowLocalizedBlueMessageAsync(nameof(PlayerMessage.ShopContainsDisabledCurrencyPrices)).ConfigureAwait(false);
+            return;
+        }
+
         if (player.ShopStorage?.Items.Any(i => i.ItemOptions.Any(o => o.ItemOption?.OptionType == ItemOptionTypes.HarmonyOption)) ?? true)
         {
             player.Logger.LogWarning("OpenStore request failed: Items with an harmony option can't be traded. Player: [{0}], StoreName: [{1}]", character.Name, character.StoreName);
@@ -42,6 +50,7 @@ public class OpenStoreAction
         character.StoreName = storeName;
         player.ShopStorage.StoreOpen = true;
         player.Logger.LogDebug("OpenStore: Player: [{0}], StoreName: [{1}]", character.Name, character.StoreName);
+        await player.InvokeViewPlugInAsync<IShowShopCurrenciesPlugIn>(p => p.ShowShopCurrenciesAsync()).ConfigureAwait(false);
         await player.ForEachWorldObserverAsync<IPlayerShopOpenedPlugIn>(p => p.PlayerShopOpenedAsync(player), true).ConfigureAwait(false);
     }
 

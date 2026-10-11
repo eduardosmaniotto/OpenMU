@@ -1547,6 +1547,18 @@
   <data name="GoblinPointsForPlayTimePlugIn_Description" xml:space="preserve">
     <value>Gives players Goblin Points of the cash shop for their play time.</value>
   </data>
+  <data name="MultiCurrencyPlayerShopFeaturePlugIn_Name" xml:space="preserve">
+    <value>Personal shop with multiple currencies</value>
+  </data>
+  <data name="MultiCurrencyPlayerShopFeaturePlugIn_Description" xml:space="preserve">
+    <value>Allows personal shop prices in jewels and account coins in addition to Zen. Disabled by default; non-Zen items require the extended client and are hidden from vanilla clients.</value>
+  </data>
+  <data name="ShopPriceChatCommandPlugIn_Name" xml:space="preserve">
+    <value>Shop price chat command</value>
+  </data>
+  <data name="ShopPriceChatCommandPlugIn_Description" xml:space="preserve">
+    <value>Sets the price of a personal store item in any enabled currency, e.g. /shopprice 12 10 bless. Works with vanilla clients which can't send the extended price packet.</value>
+  </data>
   <data name="VaultExtensionDeliveryPlugIn_Name" xml:space="preserve">
     <value>Cash shop: Vault Expansion Certificate</value>
   </data>

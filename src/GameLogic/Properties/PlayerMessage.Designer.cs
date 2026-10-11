@@ -932,6 +932,15 @@ namespace MUnique.OpenMU.GameLogic.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Usage: /shopprice [slot 1-32] [amount] [currency]. Without arguments, it lists the store items. Slot is the store position of the item. Amount 0 removes the price..
+        /// </summary>
+        public static string InvalidShopPriceArguments {
+            get {
+                return ResourceManager.GetString("InvalidShopPriceArguments", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid {0} - must be bigger than 1..
         /// </summary>
         public static string InvalidStatValue {
@@ -1697,6 +1706,15 @@ namespace MUnique.OpenMU.GameLogic.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You need {0} {1} to buy this item..
+        /// </summary>
+        public static string NotEnoughShopCurrency {
+            get {
+                return ResourceManager.GetString("NotEnoughShopCurrency", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Not entered the game..
         /// </summary>
         public static string NotEnteredTheGame {
@@ -2012,6 +2030,33 @@ namespace MUnique.OpenMU.GameLogic.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Some items are priced in disabled currencies. Change their prices before opening the store..
+        /// </summary>
+        public static string ShopContainsDisabledCurrencyPrices {
+            get {
+                return ResourceManager.GetString("ShopContainsDisabledCurrencyPrices", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}: {1} — {2}..
+        /// </summary>
+        public static string ShopPriceListEntry {
+            get {
+                return ResourceManager.GetString("ShopPriceListEntry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to no price.
+        /// </summary>
+        public static string ShopPriceNoPrice {
+            get {
+                return ResourceManager.GetString("ShopPriceNoPrice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Level set to {0}..
         /// </summary>
         public static string SetLevelResult {
@@ -2206,6 +2251,15 @@ namespace MUnique.OpenMU.GameLogic.Properties {
         public static string UnknownAttribute {
             get {
                 return ResourceManager.GetString("UnknownAttribute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unknown shop currency: {0}. Valid currencies: {1}..
+        /// </summary>
+        public static string UnknownShopCurrency {
+            get {
+                return ResourceManager.GetString("UnknownShopCurrency", resourceCulture);
             }
         }
         
